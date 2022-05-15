@@ -4,13 +4,16 @@ const gravityConstant = 1.1;
 const repulsionForce = 1100;
 const degreeForceConstant = 0.25;
 const springForceConstant = 0.8;
+const edgeAngleRepulsionContant = 0.1;
 let center;
 let pg;
 var neighbours = new Map();
 
+let gravityForces;
 let chargeRepulsion;
 let degreeRepulsion;
 let springForces;
+let edgeAngleRepulsion;
 
 function degree(n) {
   return (neighbours.get(n) || []).length;
@@ -21,8 +24,7 @@ function newNode(pos, id) {
     id: id,
     pos: pos,
     force: createVector(0, 0),
-    // mass: 2 * PI * size * size,
-    mass: () => 4*degree(id) + 3,
+    mass: () => 4*degree(id) + 4,
     update: function() {
       let velocity = p5.Vector.div(this.force, this.mass());
       this.pos.add(velocity);
@@ -30,7 +32,6 @@ function newNode(pos, id) {
     draw: function() {
       pg.noStroke();
       pg.fill(0);
-      // pg.ellipse(this.pos.x, this.pos.y, this.mass(), this.mass())
       pg.ellipse(this.pos.x, this.pos.y, this.mass(), this.mass())
     }
   };
@@ -124,11 +125,41 @@ function applySpringForces() {
     let node2 = edge[1];
     let dir = node1.pos.copy().sub(node2.pos);
     let dist = dir.mag();
-    let optimalLen = 10*(width * height)/(nodes.length * nodes.length);
-    let correction = springForceConstant*(optimalLen - dist)/optimalLen;
+    let optimalLen = Math.log(nodes.length * nodes.length);
+    let correction = (dist - optimalLen)/Math.max(Math.abs(optimalLen), Math.abs(dist));
     node1.force.sub(dir.copy().mult(correction));
     node2.force.add(dir.copy().mult(correction));
   });
+}
+
+function applyEdgeAngleRepulsion() {
+  for (let centralNode of nodes) {
+    let allAdjacent = neighbours.get(centralNode.id);
+    if (allAdjacent == null) {
+      continue;
+    }
+    let adjacent = allAdjacent.filter((v, i, a) => a.indexOf(v) === i);
+    let optimalAngle = 2*PI/adjacent.length;
+    for (let i = 0; i < adjacent.length; i++) {
+      let nodeA = nodes[adjacent[i]];
+      for (let j = i + 1; j < adjacent.length; j++) {
+        let nodeB = nodes[adjacent[j]];
+        let centralToADir = nodeA.pos.copy().sub(centralNode.pos);
+        let centralToBDir = nodeB.pos.copy().sub(centralNode.pos);
+        let angle = Math.abs(centralToADir.angleBetween(centralToBDir));
+        let correctionAngle = edgeAngleRepulsionContant*(optimalAngle - angle);
+        if (random(100) <= 2) {
+          console.log(angle);
+          console.log(correctionAngle);
+        }
+        let newDirCentralToA = centralToADir.copy().rotate(correctionAngle);
+        let desiredPosA = newDirCentralToA.copy().add(centralNode.pos);
+        let force = desiredPosA.copy().sub(nodeA.pos);
+
+        nodeA.force.add(force);
+      }
+    }
+  };
 }
 
 function applyForces() {
@@ -141,6 +172,10 @@ function applyForces() {
   if (springForces) {
     applySpringForces();
   }
+
+  if (edgeAngleRepulsion) {
+    applyEdgeAngleRepulsion();
+  }
 }
 
 function setup() {
@@ -148,6 +183,7 @@ function setup() {
   chargeRepulsion = document.getElementById("charge").checked;
   degreeRepulsion = document.getElementById("degree").checked;
   springForces = document.getElementById("spring").checked;
+  edgeAngleRepulsion = document.getElementById("angle").checked;
 
   let bodyWidth = document.body.clientWidth;
   let bodyHeight = document.body.clientHeight;

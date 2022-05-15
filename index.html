@@ -17,14 +17,16 @@
       <input id="nodes" value="50"/>
       <label style="margin-left: 20px">Edges:</label>
       <input id="edges" value="100"/>
-      <input type="checkbox" id="gravity" name="gravity" value="gravity" checked>
+      <input type="checkbox" id="gravity" name="gravity" value="gravity" checked onclick="gravityForces=!gravityForces">
       <label for="gravity"> Gravity</label>
-      <input type="checkbox" id="charge" name="charge" value="charge" checked>
+      <input type="checkbox" id="charge" name="charge" value="charge" checked onclick="chargeRepulsion=!chargeRepulsion">
       <label for="charge"> Charge repulsion</label>
-      <input type="checkbox" id="spring" name="spring" value="spring" checked>
+      <input type="checkbox" id="spring" name="spring" value="spring" checked onclick="springForces=!springForces">
       <label for="degree"> Spring forces</label>
-      <input type="checkbox" id="degree" name="degree" value="degree" checked>
+      <input type="checkbox" id="degree" name="degree" value="degree" checked onclick="degreeRepulsion=!degreeRepulsion">
       <label for="degree"> Degree repulsion</label>
+      <input type="checkbox" id="angle" name="angle" value="angle" checked onclick="edgeAngleRepulsion=!edgeAngleRepulsion">
+      <label for="angle"> Edge angle repulsion</label>
 
       <button onclick="document.location.reload()">Refresh</button>
     </div>
