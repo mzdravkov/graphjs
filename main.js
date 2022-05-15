@@ -148,10 +148,6 @@ function applyEdgeAngleRepulsion() {
         let centralToBDir = nodeB.pos.copy().sub(centralNode.pos);
         let angle = Math.abs(centralToADir.angleBetween(centralToBDir));
         let correctionAngle = edgeAngleRepulsionContant*(optimalAngle - angle);
-        if (random(100) <= 2) {
-          console.log(angle);
-          console.log(correctionAngle);
-        }
         let newDirCentralToA = centralToADir.copy().rotate(correctionAngle);
         let desiredPosA = newDirCentralToA.copy().add(centralNode.pos);
         let force = desiredPosA.copy().sub(nodeA.pos);
