@@ -1,6 +1,6 @@
 var nodes = [];
 var edges = [];
-const gravityConstant = 1.1;
+const gravityConstant = 0.9;
 const repulsionForce = 1100;
 const degreeForceConstant = 0.25;
 const springForceConstant = 0.8;
@@ -96,7 +96,7 @@ function initEdges() {
 // to the origin.
 function applyGravity() {
   nodes.forEach(node => {
-    let gravity = p5.Vector.sub(node.pos, center).mult(-1).mult(gravityConstant);
+    let gravity = p5.Vector.sub(node.pos, center).mult(-1).mult(gravityConstant).mult(node.mass);
     node.force = gravity;
   });
 }
