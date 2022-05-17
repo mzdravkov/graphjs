@@ -19,6 +19,7 @@ function degree(n) {
   return (neighbours.get(n) || []).length;
 }
 
+// Create a new node with the given position and id.
 function newNode(pos, id) {
   return {
     id: id,
@@ -37,17 +38,21 @@ function newNode(pos, id) {
   };
 }
 
+// Places N nodes at random positions, where N is taken from the
+// "nodes" input.
 function initNodes() {
   let nodesCount = document.getElementById("nodes").value;
   for (var i = 0; i < nodesCount; i++) {
     let x = random(width);
     let y = random(height);
-    node = newNode(createVector(x, y), i);//random(1, 2.5))
+    node = newNode(createVector(x, y), i);
     nodes.push(node);
   }
 }
 
 
+// Takes two nodes and adds each one of them as a neigbour
+// of the other in the global "neighbours" map.
 function addNeighbours(n1, n2) {
   if (neighbours.has(n1)) {
     neighbours.get(n1).push(n2);
@@ -61,6 +66,8 @@ function addNeighbours(n1, n2) {
   }
 }
 
+// Adds M edges between random pairs of nodes, where M is the
+// number of edges taken from the "edges" input.
 function initEdges() {
   let nodesCount = document.getElementById("nodes").value;
   let edgesCount = document.getElementById("edges").value;
@@ -85,6 +92,8 @@ function initEdges() {
   }
 }
 
+// Applies a force of gravity to all nodes which pulls them
+// to the origin.
 function applyGravity() {
   nodes.forEach(node => {
     let gravity = p5.Vector.sub(node.pos, center).mult(-1).mult(gravityConstant);
@@ -92,6 +101,10 @@ function applyGravity() {
   });
 }
 
+// Applies repulsion forces between all nodes. There are two types of such forces:
+// - Charge repulsion acting between any pair of nodes. The force becomes
+//   stronger when the nodes are closer.
+// - Degree repulsion makes high-degree nodes repulse other high-degree nodes.
 function applyRepulsionForces() {
   for (let i = 0; i < nodes.length; i++) {
     let node1 = nodes[i];
@@ -119,6 +132,11 @@ function applyRepulsionForces() {
   }
 }
 
+// Applies forces on nodes in attempt to keep the length of the edges
+// to their optimal length (calculated based on the number of nodes).
+// If the edge is too short, the nodes incident to it would be pushed away
+// from each other and if the edge is too long, the nodes would be pulled
+// together.
 function applySpringForces() {
   edges.forEach(edge => {
     let node1 = edge[0];
@@ -132,6 +150,9 @@ function applySpringForces() {
   });
 }
 
+// Applies forces so that edges incident to a node are distributed
+// evenly around the node. Basically, trying to keep a 360/deg(node)
+// degree angle between them.
 function applyEdgeAngleRepulsion() {
   for (let centralNode of nodes) {
     let allAdjacent = neighbours.get(centralNode.id);
@@ -158,6 +179,7 @@ function applyEdgeAngleRepulsion() {
   };
 }
 
+// Applies all forces for a single iteration.
 function applyForces() {
   if (gravityForces) {
     applyGravity();
