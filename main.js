@@ -31,9 +31,9 @@ function newNode(pos, id) {
       this.pos.add(velocity);
     },
     draw: function() {
-      pg.noStroke();
-      pg.fill(0);
-      pg.ellipse(this.pos.x, this.pos.y, this.mass(), this.mass())
+      noStroke();
+      fill(0);
+      ellipse(this.pos.x, this.pos.y, this.mass(), this.mass())
     }
   };
 }
@@ -205,17 +205,36 @@ function setup() {
 
   let bodyWidth = document.body.clientWidth;
   let bodyHeight = document.body.clientHeight;
-  createCanvas(bodyWidth, bodyHeight);
-  pg = createGraphics(bodyWidth, bodyHeight);
+  createCanvas(bodyWidth, bodyHeight - 100);
   center = createVector(width / 2, height / 2);
   initNodes();
   initEdges();
 }
 
+// Updates the currentScale variable so that the whole
+// graph fits on the canvas.
+function rescale() {
+  let minX = Math.min.apply(null, nodes.map(n => n.pos.x));
+  let maxX = Math.max.apply(null, nodes.map(n => n.pos.x));
+  let minY = Math.min.apply(null, nodes.map(n => n.pos.y));
+  let maxY = Math.max.apply(null, nodes.map(n => n.pos.y));
+
+  let x = maxX - minX;
+  let y = maxY - minY;
+
+  return 1/Math.max(x/width, y/height, 1);
+}
+
 function draw() {
+  let currentScale = rescale();
+  if (currentScale != 1) {
+    translate(width/2, height/2);
+    scale(currentScale);
+    translate(-width/2, -height/2);
+  }
 
   // white background
-  pg.background(258);
+  background(258);
 
   nodes.forEach(node => {
     node.draw();
@@ -223,12 +242,10 @@ function draw() {
   });
 
   edges.forEach(edge => {
-    pg.stroke(0);
-    pg.line(edge[0].pos.x, edge[0].pos.y, edge[1].pos.x, edge[1].pos.y);
+    stroke(0);
+    line(edge[0].pos.x, edge[0].pos.y, edge[1].pos.x, edge[1].pos.y);
   });
 
   applyForces();
-
-  image(pg, 0, 0);
 }
 
